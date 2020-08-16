@@ -62,8 +62,6 @@ class BinaryConvolution2DFunction(function.Function):
         x, W = inputs[:2]
         b = inputs[2] if len(inputs) == 3 else None
         kh, kw = W.shape[2:]
-        # print("forward")
-        # print(x.shape)
         self.col = conv.im2col_cpu(
             x, kh, kw, self.sy, self.sx, self.ph, self.pw)
         Wb = numpy.where(W>=0, 1, -1).astype(numpy.float32, copy=False)
@@ -149,18 +147,6 @@ class BinaryConvolution2DFunction(function.Function):
         gcol = numpy.tensordot(Wb, gy, (0, 1))
         gcol = numpy.rollaxis(gcol, 3)
         gx = conv.col2im_cpu(gcol, self.sy, self.sx, self.ph, self.pw, h, w)
-        # print("gy")
-        # print(gy.shape)
-        # print("x")
-        # print(x.shape)
-        # print("Wb")
-        # print(Wb.shape)
-        # print("gx")
-        # print(gx.shape)
-        # print("gW")
-        # print(gW.shape)
-        # print("col")
-        # print(self.col.shape)
         if b is None:
             return gx, gW
         else:

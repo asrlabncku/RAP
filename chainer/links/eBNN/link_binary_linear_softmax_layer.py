@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
+from chainer.functions import accuracy
 import chainer
-import chainer.functions as F
 import numpy as np
 
 from chainer.links import CLink
@@ -10,7 +10,7 @@ from chainer.links.eBNN.link_softmax_cross_entropy import SoftmaxCrossEntropy
 from chainer.utils import binary_util as bu
 import math
 
-class BinaryLinearSoftmax(chainer.Chain, CLink):
+class BinaryLinearSoftmax(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels):
         super(BinaryLinearSoftmax, self).__init__(
             bl=BinaryLinear(in_channels, out_channels),
@@ -21,7 +21,7 @@ class BinaryLinearSoftmax(chainer.Chain, CLink):
     def __call__(self, h, t=None):
         h = self.bl(h)
         if t is not None:
-            self.accuracy = F.accuracy(h,t)
+            self.accuracy = accuracy(h,t)
             loss = self.sm(h,t)
             return loss
         return h

@@ -8,7 +8,7 @@ import numpy as np
 import cupy
 import time
 import os
-dllpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'libcnet.so'))
+dllpath = '/home/monica/Documents/chainer-1.17.0-RAP/chainer/functions/cnet/libcnet.so'
 lib = CDLL(dllpath, RTLD_GLOBAL)
 
 # def _kern():
@@ -370,7 +370,4 @@ def cnet_convolution_2d(x, W, b=None, stride=1, pad=0, use_cudnn=True):
         return func(x, W)
     else:
         return func(x, W, b)
-    # if b is None:
-    #     return DarknetConvolution2DFunction()(x, W)
-    # else:
-    #     return DarknetConvolution2DFunction()(x, W, b)
+

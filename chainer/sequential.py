@@ -7,11 +7,10 @@ from chainer import binary_layer_function as binary_function
 import numpy as np
 from chainer import cuda
 import inspect
-import chainer.functions as F
-from chainer import Variable
+from chainer.variable import Variable
 
 class GenCodeError(BaseException):
-    print "gen code failed because of float point layer after binary layer"
+    print "gen code failed because of putting float point layer after binary layer"
 
 class Sequential(object):
     def __init__(self, stages=[0], weight_initializer="Normal", weight_init_std=1):
@@ -214,7 +213,7 @@ class Sequential(object):
         if l.is_bin() is True:
             text += "  {name}(input, temp1);\n".format(name=l.cname + str(link_idx))
         else:
-            text += "  {name}(input, ftemp1);\n".format(name=l.cname + str(link_idx))
+            text += "  {name}(input, ftemp1, buf);\n".format(name=l.cname + str(link_idx))
 
         link_idx += 1
 
@@ -226,14 +225,14 @@ class Sequential(object):
                 if pre_l.is_bin() is True:
                     text += "  {name}(temp1, temp2);\n".format(name=l.cname + str(link_idx))
                 elif pre_l.is_bin() is False and l.is_bin() is False:
-                    text += "  {name}(ftemp1, ftemp2);\n".format(name=l.cname + str(link_idx))
+                    text += "  {name}(ftemp1, ftemp2, buf);\n".format(name=l.cname + str(link_idx))
                 else:
                     text += "  {name}(ftemp1, temp2);\n".format(name=l.cname + str(link_idx))
             else:
                 if pre_l.is_bin() is True:
                     text += "  {name}(temp2, temp1);\n".format(name=l.cname + str(link_idx))
                 elif pre_l.is_bin() is False and l.is_bin() is False:
-                    text += "  {name}(ftemp2, ftemp1);\n".format(name=l.cname + str(link_idx))
+                    text += "  {name}(ftemp2, ftemp1, buf);\n".format(name=l.cname + str(link_idx))
                 else:
                     text += "  {name}(ftemp2, temp1);\n".format(name=l.cname + str(link_idx))
             link_idx = link_idx + 1
@@ -245,12 +244,12 @@ class Sequential(object):
             if l.is_bin() is True:
                 text += "  {name}(temp1, output);\n".format(name=l.cname + str(link_idx))
             else:
-                text += "  {name}(ftemp1, output);\n".format(name=l.cname + str(link_idx))
+                text += "  {name}(ftemp1, output, buf);\n".format(name=l.cname + str(link_idx))
         else:
             if l.is_bin() is True:
                 text += "  {name}(temp2, output);\n".format(name=l.cname + str(link_idx))
             else:
-                text += "  {name}(ftemp2, output);\n".format(name=l.cname + str(link_idx))
+                text += "  {name}(ftemp2, output, buf);\n".format(name=l.cname + str(link_idx))
         text += "}"
 
         return text
@@ -283,6 +282,9 @@ class Sequential(object):
         binter_sizes = []
         inter_sizes = []
         buf_sizes = []
+        inter_size = 0
+        binter_size = 0
+        buf_size = 0
         for i, link in enumerate(self.links):
             if hasattr(link, 'generate_c'):
                 # float buffer
@@ -293,20 +295,22 @@ class Sequential(object):
                 buf_sizes.append(link.buf_mem(h.shape))
                 text += link.generate_c(i, h.shape)
             h = link(h, test=True)
-        inter_size = int(np.max(inter_sizes))
-        binter_size = int(np.max(binter_sizes))
-        buf_size = int(np.max(buf_sizes))
-# TODO: temp buffer float point case
-        if inter_size != 0:
-            text += """
-uint8_t temp1[{inter_size}] = {{0}};
-uint8_t temp2[{inter_size}] = {{0}};
-""".format(name=name, input_size=input_size, inter_size=inter_size, inp=inp)
+        if inter_sizes:
+            inter_size = int(np.max(inter_sizes))
+        if binter_sizes:
+            binter_size = int(np.max(binter_sizes))
+        if buf_sizes:
+            buf_size = int(np.max(buf_sizes))
         if binter_size != 0:
             text += """
-float ftemp1[{binter_size}] = {{0}};
-float ftemp2[{binter_size}] = {{0}};
+uint8_t temp1[{binter_size}] = {{0}};
+uint8_t temp2[{binter_size}] = {{0}};
 """.format(name=name, input_size=input_size, binter_size=binter_size, inp=inp)
+        if inter_size != 0:
+            text += """
+float ftemp1[{inter_size}] = {{0}};
+float ftemp2[{inter_size}] = {{0}};
+""".format(name=name, input_size=input_size, inter_size=inter_size, inp=inp)
         if buf_size != 0:
             text += """
 float buf[{buf_size}] = {{0}};

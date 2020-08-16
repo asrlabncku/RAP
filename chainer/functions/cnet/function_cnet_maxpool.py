@@ -8,7 +8,7 @@ import numpy as np
 import cupy
 import time
 import os
-dllpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'libcnet.so'))
+dllpath = '/home/monica/Documents/chainer-1.17.0-RAP/chainer/functions/cnet/libcnet.so'
 lib = CDLL(dllpath, RTLD_GLOBAL)
 
 # def _kern():
@@ -316,7 +316,3 @@ def cnet_max_pooling_2d(x, ksize, stride=None, pad=0, cover_all=True,
     """
 
     return CnetMaxPooling2DFunction(ksize, stride, pad, cover_all, use_cudnn)(x)
-    # if b is None:
-    #     return DarknetConvolution2DFunction()(x, W)
-    # else:
-    #     return DarknetConvolution2DFunction()(x, W, b)

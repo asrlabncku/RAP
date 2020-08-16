@@ -8,6 +8,7 @@ import math
 from chainer import initializers
 from chainer import cuda
 
+
 class CnetLinear(link.Link):
     """Binary Linear layer (a.k.a. binary fully-connected layer).
 

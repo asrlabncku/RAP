@@ -1,16 +1,15 @@
 from __future__ import absolute_import
 import math
-
-import chainer
 import numpy as np
 
 from chainer.links import CLink
+import chainer
 from chainer.links.eBNN.link_binary_convolution import BinaryConvolution2D
 from chainer.links.eBNN.link_batch_normalization import BatchNormalization
 from chainer.links.eBNN.link_bst import BST
 from chainer.utils import binary_util as bu
 
-class BinaryConvBNBST(chainer.Chain, CLink):
+class BinaryConvBNBST(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels, ksize=3, stride=1, pad=0):
         super(BinaryConvBNBST, self).__init__(
             bconv=BinaryConvolution2D(in_channels, out_channels, ksize=ksize, stride=stride, pad=pad),

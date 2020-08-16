@@ -62,7 +62,7 @@ static void gemm_tn(int M, int N, int K, float ALPHA,
 static void gemm_tt(int M, int N, int K, float ALPHA,
                     float *A, int lda,
                     float *B, int ldb,
-                    float *C, int ldc)
+                    float *C, int ldc);
 void gemm(int TA, int TB, int M, int N, int K, float ALPHA,
           data_val_t **A, int offa, int lda,
           data_val_t **B, int offb, int ldb,

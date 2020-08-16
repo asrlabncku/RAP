@@ -25,8 +25,8 @@ from chainer import serializer
 from chainer import serializers  # NOQA
 from chainer import training  # NOQA
 from chainer import variable
-from chainer.sequential import *
-from chainer.chain_RAP import ChainRAP
+from chainer import sequential
+from chainer import chain_RAP
 
 if sys.version_info[:3] == (3, 5, 0):
     if not int(os.getenv('CHAINER_PYTHON_350_FORCE', '0')):
@@ -60,6 +60,8 @@ Serializer = serializer.Serializer
 Summary = reporter.Summary
 Variable = variable.Variable
 Initializer = initializer.Initializer
+Sequential = sequential.Sequential
+ChainRAP = chain_RAP.ChainRAP
 
 ON = flag.ON
 OFF = flag.OFF
@@ -134,12 +136,12 @@ init_weight = initializers.init_weight
 
 
 def from_json(str):
-    seq = Sequential()
+    seq = sequential.Sequential()
     seq.from_json(str)
     return seq
 
 
 def from_dict(dict_array):
-    seq = Sequential()
+    seq = sequential.Sequential()
     seq.from_dict(dict_array)
     return seq

@@ -28,16 +28,7 @@ from chainer.links.loss import hierarchical_softmax
 from chainer.links.loss import negative_sampling
 from chainer.links.model import classifier
 from chainer.links.normalization import batch_normalization
-from chainer.links.eBNN import link_binary_conv_BN_BST
-from chainer.links.eBNN import link_binary_conv_pool_BN_BST
-from chainer.links.eBNN import link_binary_linear_BN_softmax_layer
-from chainer.links.eBNN import link_binary_linear_BN_BST
-from chainer.links.eBNN import link_binary_linear_softmax_layer
-from chainer.links.eBNN import link_conv_BN_BST
-from chainer.links.eBNN import link_conv_pool_BN_BST
-from chainer.links.cnet import link_cnet_lin
-from chainer.links.cnet import link_cnet_conv
-from chainer.links.cnet import link_cnet_pool
+
 
 # for C implement
 class CLink(object):
@@ -52,6 +43,17 @@ class CLink(object):
 
     def temp_mem(self):
         raise NotImplementedError("Not implemented. This link cannot be exported as c.")
+
+from chainer.links.eBNN import link_binary_conv_BN_BST
+from chainer.links.eBNN import link_binary_conv_pool_BN_BST
+from chainer.links.eBNN import link_binary_linear_BN_softmax_layer
+from chainer.links.eBNN import link_binary_linear_BN_BST
+from chainer.links.eBNN import link_binary_linear_softmax_layer
+from chainer.links.eBNN import link_conv_BN_BST
+from chainer.links.eBNN import link_conv_pool_BN_BST
+from chainer.links.cnet import link_cnet_lin
+from chainer.links.cnet import link_cnet_conv
+from chainer.links.cnet import link_cnet_pool
 
 
 Maxout = maxout.Maxout

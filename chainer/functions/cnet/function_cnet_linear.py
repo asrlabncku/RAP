@@ -6,7 +6,7 @@ import numpy as np
 import cupy
 import time
 import os
-dllpath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'libcnet.so'))
+dllpath = '/home/monica/Documents/chainer-1.17.0-RAP/chainer/functions/cnet/libcnet.so'
 lib = CDLL(dllpath, RTLD_GLOBAL)
 
 class data_t(Structure):

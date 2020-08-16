@@ -3,6 +3,7 @@ from chainer import link
 
 from chainer.functions.cnet import function_cnet_maxpool
 
+
 class CnetPool2D(link.Link):
     def __init__(self, kern=3, stride=2, pad=0):
         self.kern = kern

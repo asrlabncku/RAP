@@ -1,16 +1,14 @@
 from __future__ import absolute_import
 import math
-
-import chainer
 import numpy as np
-
+import chainer
 from chainer.links import CLink
 from chainer.links.eBNN.link_binary_linear import BinaryLinear
 from chainer.links.eBNN.link_batch_normalization import BatchNormalization
 from chainer.links.eBNN.link_bst import BST
 from chainer.utils import binary_util as bu
 
-class BinaryLinearBNBST(chainer.Chain, CLink):
+class BinaryLinearBNBST(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels):
         super(BinaryLinearBNBST, self).__init__(
             bl=BinaryLinear(in_channels, out_channels),

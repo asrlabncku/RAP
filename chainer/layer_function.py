@@ -1,6 +1,28 @@
 import math
-from chainer import cuda, Variable
-from chainer import functions as F
+import chainer
+from chainer import cuda
+from chainer.variable import Variable
+# from chainer.functions import clipped_relu as f_clipped_relu
+# from chainer.functions import crelu as f_crelu
+# from chainer.functions import elu as f_elu
+# from chainer.functions import hard_sigmoid as f_hard_sigmoid
+# from chainer.functions import leaky_relu as f_leaky_relu
+# from chainer.functions import log_softmax as f_log_softmax
+# from chainer.functions import maxout as f_maxout
+# from chainer.functions import relu as f_relu
+# from chainer.functions import sigmoid as f_sigmoid
+# from chainer.functions import softmax as f_softmax
+# from chainer.functions import softplus as f_softplus
+# from chainer.functions import tanh as f_tanh
+# from chainer.functions import dropout as f_dropout
+# from chainer.functions import gaussian as f_gaussian
+# from chainer.functions import average_pooling_2d as f_average_pooling_2d
+# from chainer.functions import max_pooling_2d as f_max_pooling_2d
+# from chainer.functions import spatial_pyramid_pooling_2d as f_spatial_pyramid_pooling_2d
+# from chainer.functions import unpooling_2d as f_unpooling_2d
+# from chainer.functions import reshape as f_reshape
+# from chainer.functions import softmax_cross_entropy as f_softmax_cross_entropy
+
 
 class Function(object):
 
@@ -47,8 +69,6 @@ class Activation(object):
         raise NotImplementedError()
 
 
-from chainer.functions.eBNN import *
-
 from chainer.functions.eBNN import function_bst
 class bst(Function):
     def __init__(self):
@@ -63,7 +83,7 @@ class clipped_relu(Function):
         self.z = z
 
     def __call__(self, x):
-        return F.clipped_relu(x, self.z)
+        return chainer.functions.clipped_relu(x, self.z)
 
 class crelu(Function):
     def __init__(self, axis=1):
@@ -71,7 +91,7 @@ class crelu(Function):
         self.axis = axis
 
     def __call__(self, x):
-        return F.crelu(x, self.axis)
+        return chainer.functions.crelu(x, self.axis)
 
 class elu(Function):
     def __init__(self, alpha=1.0):
@@ -79,7 +99,7 @@ class elu(Function):
         self.alpha = alpha
 
     def __call__(self, x):
-        return F.elu(x, self.alpha)
+        return chainer.functions.elu(x, self.alpha)
 
 class hard_sigmoid(Function):
     def __init__(self):
@@ -87,7 +107,7 @@ class hard_sigmoid(Function):
         pass
 
     def __call__(self, x):
-        return F.hard_sigmoid(x)
+        return chainer.functions.hard_sigmoid(x)
 
 class leaky_relu(Function):
     def __init__(self, slope=0.2):
@@ -95,7 +115,7 @@ class leaky_relu(Function):
         self.slope = slope
 
     def __call__(self, x):
-        return F.leaky_relu(x, self.slope)
+        return chainer.functions.leaky_relu(x, self.slope)
 
 class log_softmax(Function):
     def __init__(self, use_cudnn=True):
@@ -103,7 +123,7 @@ class log_softmax(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.log_softmax(x, self.use_cudnn)
+        return chainer.functions.log_softmax(x, self.use_cudnn)
 
 class maxout(Function):
     def __init__(self, pool_size, axis=1):
@@ -112,7 +132,7 @@ class maxout(Function):
         self.axis = axis
 
     def __call__(self, x):
-        return F.maxout(x, self.pool_size, self.axis)
+        return chainer.functions.maxout(x, self.pool_size, self.axis)
 
 class relu(Function):
     def __init__(self, use_cudnn=True):
@@ -120,7 +140,7 @@ class relu(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.relu(x, self.use_cudnn)
+        return chainer.functions.relu(x, self.use_cudnn)
 
 class sigmoid(Function):
     def __init__(self, use_cudnn=True):
@@ -128,7 +148,7 @@ class sigmoid(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.sigmoid(x, self.use_cudnn)
+        return chainer.functions.sigmoid(x, self.use_cudnn)
 
 class softmax(Function):
     def __init__(self, use_cudnn=True):
@@ -136,7 +156,7 @@ class softmax(Function):
         self.use_cudnn = use_cudnn
         pass
     def __call__(self, x):
-        return F.softmax(x, self.use_cudnn)
+        return chainer.functions.softmax(x, self.use_cudnn)
 
 class softplus(Function):
     def __init__(self, use_cudnn=True):
@@ -144,7 +164,7 @@ class softplus(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.softplus(x, self.use_cudnn)
+        return chainer.functions.softplus(x, self.use_cudnn)
 
 class tanh(Function):
     def __init__(self, use_cudnn=True):
@@ -152,7 +172,7 @@ class tanh(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.tanh(x, self.use_cudnn)
+        return chainer.functions.tanh(x, self.use_cudnn)
 
 class dropout_comm_test(Function):
     def __init__(self, ratio=0.5):
@@ -161,7 +181,7 @@ class dropout_comm_test(Function):
 
     def __call__(self, x, train=True):
         if not train:
-            return F.dropout(x, self.ratio, True)
+            return chainer.functions.dropout(x, self.ratio, True)
         return x
     
 class dropout_comm_train(Function):
@@ -171,7 +191,7 @@ class dropout_comm_train(Function):
 
     def __call__(self, x, train=True):
         if train:
-            return F.dropout(x, self.ratio, True)
+            return chainer.functions.dropout(x, self.ratio, True)
         return x
 
 class dropout(Function):
@@ -180,7 +200,7 @@ class dropout(Function):
         self.ratio = ratio
 
     def __call__(self, x, train=True):
-        return F.dropout(x, self.ratio, train)
+        return chainer.functions.dropout(x, self.ratio, train)
 
 class gaussian_noise(Function):
     def __init__(self, std=0.3):
@@ -190,7 +210,7 @@ class gaussian_noise(Function):
     def __call__(self, x):
         xp = cuda.get_array_module(x.data)
         ln_var = math.log(self.std ** 2)
-        noise = F.gaussian(Variable(xp.zeros_like(x.data)), Variable(xp.full_like(x.data, ln_var)))
+        noise = chainer.functions.gaussian(Variable(xp.zeros_like(x.data)), Variable(xp.full_like(x.data, ln_var)))
         return x + noise
 
 class average_pooling_2d(Function):
@@ -202,7 +222,7 @@ class average_pooling_2d(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.average_pooling_2d(x, self.ksize, self.stride, self.pad, self.use_cudnn)
+        return chainer.functions.average_pooling_2d(x, self.ksize, self.stride, self.pad, self.use_cudnn)
 
 class max_pooling_2d(Function):
     def __init__(self, ksize, stride=None, pad=0, cover_all=True, use_cudnn=True):
@@ -214,7 +234,7 @@ class max_pooling_2d(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.max_pooling_2d(x, self.ksize, self.stride, self.pad, self.cover_all, self.use_cudnn)
+        return chainer.functions.max_pooling_2d(x, self.ksize, self.stride, self.pad, self.cover_all, self.use_cudnn)
 
 class spatial_pyramid_pooling_2d(Function):
     def __init__(self, pyramid_height, pooling_class, use_cudnn=True):
@@ -224,7 +244,7 @@ class spatial_pyramid_pooling_2d(Function):
         self.use_cudnn = use_cudnn
 
     def __call__(self, x):
-        return F.spatial_pyramid_pooling_2d(x, self.pyramid_height, self.pooling_class, self.use_cudnn)
+        return chainer.functions.spatial_pyramid_pooling_2d(x, self.pyramid_height, self.pooling_class, self.use_cudnn)
 
 class unpooling_2d(Function):
     def __init__(self, ksize, stride=None, pad=0, outsize=None, cover_all=True):
@@ -236,19 +256,7 @@ class unpooling_2d(Function):
         self.cover_all = cover_all
 
     def __call__(self, x):
-        return F.unpooling_2d(x, self.ksize, self.stride, self.pad, self.outsize, self.cover_all)
-
-class unpooling_2d(Function):
-    def __init__(self, ksize, stride=None, pad=0, outsize=None, cover_all=True):
-        self._function = "unpooling_2d"
-        self.ksize = ksize
-        self.stride = stride
-        self.pad = pad
-        self.outsize = outsize
-        self.cover_all = cover_all
-
-    def __call__(self, x):
-        return F.unpooling_2d(x, self.ksize, self.stride, self.pad, self.outsize, self.cover_all)
+        return chainer.functions.unpooling_2d(x, self.ksize, self.stride, self.pad, self.outsize, self.cover_all)
 
 class reshape(Function):
     def __init__(self, shape):
@@ -256,7 +264,7 @@ class reshape(Function):
         self.shape = shape
 
     def __call__(self, x):
-        return F.reshape(x, self.shape)
+        return chainer.functions.reshape(x, self.shape)
 
 class reshape_1d(Function):
     def __init__(self):
@@ -264,11 +272,11 @@ class reshape_1d(Function):
 
     def __call__(self, x):
         batchsize = x.data.shape[0]
-        return F.reshape(x, (batchsize, -1))
+        return chainer.functions.reshape(x, (batchsize, -1))
     
 class softmax_cross_entropy(Function):
     def __init__(self):
         self._function = "softmax_cross_entropy"
 
     def __call__(self, x, t):
-        return F.softmax_cross_entropy(x,t)
+        return chainer.functions.softmax_cross_entropy(x,t)

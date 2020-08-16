@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 import math
-
-import numpy as np
 import chainer
+import numpy as np
+from chainer.chain_RAP import ChainRAP
 from chainer.links import CLink
 from chainer.links.cnet import link_cnet_convolution
 
-class CnetConv(chainer.Chain, CLink):
+class CnetConv(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels, ksize=3, stride=1, pad=0):
         super(CnetConv, self).__init__(
             conv=link_cnet_convolution.CnetConvolution2D(in_channels, out_channels, ksize=ksize, stride=stride, pad=pad)
@@ -26,31 +26,22 @@ class CnetConv(chainer.Chain, CLink):
         c, w, h = inp_shape[1:4]
         sw, sh = self.conv.stride
         pw, ph = self.conv.pad
-        kw, kh = self.conv.ksize
+        kw, kh = self.conv.W.data.shape[2:4]
         out_w = (w + 2 * ph - kh) / sw + 1
         out_h = (h + 2 * ph - kh) / sw + 1
 
         # conv
         l = self.conv
         lname = name + '_' + 'layer'
-        text += 'layer_t {}{{}};'.format(lname)
-        text += '{}.batch = 1;'.format(lname)
-        text += '{}.input.size = {};'.format(lname, np.prod(inp_shape))
-        text += '{}.output.size = {};'.format(lname, np.prod(np.prod(l.b.data.shape)))
-        text += '{}.weight.size = {};'.format(lname, np.prod(np.prod(l.W.data.shape)))
-        text += '{}.bias.size = {};'.format(lname, np.prod(np.prod(l.b.data.shape)))
-        text += '{}.extra.size = {};'.format(lname, (c * kh * kw * out_h * out_w))
+        text.append('layer_t {} = {{}};'.format(lname))
+        isize = np.prod(inp_shape)
+        osize = np.prod(l.b.data.shape)
+        wsize = np.prod(l.W.data.shape)
+        bsize = np.prod(l.b.data.shape)
+        esize = c * kh * kw * out_h * out_w
         lcname = name + '_' + 'conv'
-        text += 'conv_layer_t {}{{}};'.format(lcname)
-        text += '{}.ic = {};'.format(lcname, c)
-        text += '{}.iw = {};'.format(lcname, w)
-        text += '{}.ih = {};'.format(lcname, h)
-        text += '{}.oc = {};'.format(lcname, l.W.data.shape[0])
-        text += '{}.ow = {};'.format(lcname, out_w)
-        text += '{}.oh = {};'.format(lcname, out_h)
-        text += '{}.k = {};'.format(lcname, kw)
-        text += '{}.s = {};'.format(lcname, sw)
-        text += '{}.p = {};'.format(lcname, pw)
+        text.append('conv_layer_t {} = {{}};'.format(lcname))
+        oc = l.W.data.shape[0]
         for p in l.params():
             pname = p.name
             if pname == 'W':
@@ -58,18 +49,35 @@ class CnetConv(chainer.Chain, CLink):
                 bin_data = p.data.flatten()
                 c_str = 'float {}[{}] = {{{}}};'.format(lname + '_' + pname, len(bin_data), ','.join(map(str, bin_data)))
                 text += [c_str]
-                text += '{}.weight.value = {}'.format(lname, lname + '_' + pname)
             elif pname == 'b':
                 c_str = 'float {}[{}] = {{{}}};'.format(lname + '_' + pname, len(p.data), ','.join(map(str, p.data)))
                 text += [c_str]
-                text += '{}.bias.value = {}'.format(lname, lname + '_' + pname)
         text = "\n".join(text)+'\n'
-        ftext = "void {name}(float* input, float* output){{\n"
-        ftext += "{lname}.input.val = input; \n"
-        ftext += "{lname}.output.val = output; \n"
-        ftext += "{lname}.extra.val = buf; \n"
-        ftext += "  conv_layer_forward({lname}, {lcname});\n}}\n\n"
-        ftext = ftext.format(name=name, lname=lname, lcname=lcname)
+        ftext = "void {name}(float* input, float* output, float* buf){{\n"
+        ftext += "  {lname}.batch = 1; \n"
+        ftext += "  {lname}.input.size = {isize}; \n"
+        ftext += "  {lname}.output.size = {osize}; \n"
+        ftext += "  {lname}.weight.size = {wsize}; \n"
+        ftext += "  {lname}.bias.size = {bsize}; \n"
+        ftext += "  {lname}.extra.size = {esize}; \n"
+        ftext += "  {lcname}.ic = {ic}; \n"
+        ftext += "  {lcname}.iw = {iw}; \n"
+        ftext += "  {lcname}.ih = {ih}; \n"
+        ftext += "  {lcname}.oc = {oc}; \n"
+        ftext += "  {lcname}.ow = {ow}; \n"
+        ftext += "  {lcname}.oh = {oh}; \n"
+        ftext += "  {lcname}.k = {k}; \n"
+        ftext += "  {lcname}.s = {s}; \n"
+        ftext += "  {lcname}.p = {p}; \n"
+        ftext += "  {lname}.input.val = input; \n"
+        ftext += "  {lname}.output.val = output; \n"
+        ftext += "  {lname}.weight.val = {wname}; \n"
+        ftext += "  {lname}.bias.val = {bname}; \n"
+        ftext += "  {lname}.extra.val = buf; \n"
+        ftext += "  conv_layer_forward(&{lname}, &{lcname});\n}}\n\n"
+        ftext = ftext.format(name=name, lname=lname, lcname=lcname, isize=isize, osize=osize, wsize=wsize, bsize=bsize,
+                             esize=esize, ic=c, iw=w, ih=h, oc=oc, ow=out_w, oh=out_h, k=kw, s=sw, p=pw,
+                             wname=lname + '_W', bname=lname + '_b')
         text += ftext
 
         return text
@@ -81,7 +89,7 @@ class CnetConv(chainer.Chain, CLink):
         c, w, h = inp_shape[1:4]
         sw, sh = self.conv.stride
         pw, ph = self.conv.pad
-        kw, kh = self.conv.ksize
+        kw, kh = self.conv.W.data.shape[2:4]
         out_w = (w + 2 * ph - kh) / sw + 1
         out_h = (h + 2 * ph - kh) / sw + 1
         return c * kh * kw * out_h * out_w

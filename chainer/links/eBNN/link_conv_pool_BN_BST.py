@@ -3,7 +3,7 @@ import math
 
 import chainer
 import numpy as np
-
+import chainer
 from chainer.links import CLink
 from chainer.links.eBNN.link_binary_convolution import BinaryConvolution2D
 from chainer.links.eBNN.link_pool import Pool2D
@@ -11,7 +11,7 @@ from chainer.links.eBNN.link_batch_normalization import BatchNormalization
 from chainer.links.eBNN.link_bst import BST
 from chainer.utils import binary_util as bu
 
-class ConvPoolBNBST(chainer.Chain, CLink):
+class ConvPoolBNBST(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels, ksize=3, stride=1, pad=0, pksize=3, pstride=2, ppad=0):
         super(ConvPoolBNBST, self).__init__(
             bconv=BinaryConvolution2D(in_channels, out_channels, ksize=ksize, stride=stride, pad=pad),
@@ -54,7 +54,7 @@ class ConvPoolBNBST(chainer.Chain, CLink):
             pname = p.name
             if pname == 'W':
                 num_f, n, kw, kh = p.data.shape
-                print(num_f, n, kw, kh)
+                # print(num_f, n, kw, kh)
                 # print p.data
                 bin_data = bu.binarize_real(p.data).reshape(p.data.shape[0], -1)
                 # bin_data = bu.binarize(p.data).reshape(p.data.shape[0], -1)

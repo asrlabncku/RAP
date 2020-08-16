@@ -1,17 +1,15 @@
 from __future__ import absolute_import
 import math
-
+from chainer.functions import accuracy
 import chainer
-import chainer.functions as F
 import numpy as np
-
 from chainer.links import CLink
 from chainer.links.eBNN.link_binary_linear import BinaryLinear
 from chainer.links.eBNN.link_batch_normalization import BatchNormalization
 from chainer.links.eBNN.link_softmax_cross_entropy import SoftmaxCrossEntropy
 from chainer.utils import binary_util as bu
 
-class BinaryLinearBNSoftmax(chainer.Chain, CLink):
+class BinaryLinearBNSoftmax(chainer.link.Chain, CLink):
     def __init__(self, in_channels, out_channels):
         super(BinaryLinearBNSoftmax, self).__init__(
             bl=BinaryLinear(in_channels, out_channels),
@@ -24,7 +22,7 @@ class BinaryLinearBNSoftmax(chainer.Chain, CLink):
         #self.inp_shape = h.data.shape
         h = self.bn(self.bl(h), test)
         if t is not None:
-            self.accuracy = F.accuracy(h,t)
+            self.accuracy = accuracy(h,t)
             loss = self.sm(h,t)
             return loss
         return h

@@ -6,10 +6,12 @@ import os
 from chainer import link
 from chainer.functions.cnet import function_cnet_convolution_2d
 
+
 def _pair(x):
     if hasattr(x, '__getitem__'):
         return x
     return x, x
+
 
 class CnetConvolution2D(link.Link):
 

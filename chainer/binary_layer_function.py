@@ -1,6 +1,6 @@
 import math
-from chainer import cuda, Variable
-from chainer import functions as F
+from chainer import cuda
+from chainer.variable import Variable
 #from .binary.functions import function_bst 
 from chainer.layer_function import *
 

@@ -1,4 +1,3 @@
-from chainer import training
 from chainer.training import extensions
 import chainer.serializers as S
 import chainer
@@ -32,10 +31,10 @@ class Trainer(object):
         test_iter = chainer.iterators.SerialIterator(test, batchsize,
                                                      repeat=False, shuffle=False)
 
-        updater = training.StandardUpdater(train_iter, chain.optimizer, device=gpu)
-        trainer = training.Trainer(updater, (nepoch, 'epoch'), out=folder)
+        updater = chainer.training.StandardUpdater(train_iter, chain.optimizer, device=gpu)
+        trainer = chainer.training.Trainer(updater, (nepoch, 'epoch'), out=folder)
         # trainer.extend(TrainingModeSwitch(chain))
-        trainer.extend(extensions.dump_graph('main/loss'))
+        # trainer.extend(extensions.dump_graph('main/loss'))
         trainer.extend(extensions.Evaluator(test_iter, eval_chain, device=gpu), trigger=(1, 'epoch'))
         trainer.extend(extensions.snapshot_object(
             chain, 'chain_snapshot_epoch_{.updater.epoch:06}'), trigger=(1, 'epoch'))
@@ -43,7 +42,8 @@ class Trainer(object):
             filename='snapshot_epoch_{.updater.epoch:06}'), trigger=(1, 'epoch'))
         trainer.extend(extensions.LogReport(trigger=(1, 'epoch')), trigger=(1, 'iteration'))
         trainer.extend(extensions.PrintReport(
-            ['epoch'] + reports), trigger=IntervalTrigger(1, 'epoch'))
+            ['epoch', 'main/loss', 'validation/main/loss', 'main/accuracy', 'validation/main/accuracy',
+             'elapsed_time']), trigger=IntervalTrigger(1, 'epoch'))
 
         self.trainer = trainer
 
@@ -95,6 +95,12 @@ class Trainer(object):
         #    if k in ["main/numsamples", "main/accuracy", "main/branch0exit", "main/branch1exit", "main/branch2exit"]:
         #        print k, "\t\t\t", v
         return result
+
+    def save_model(self):
+        trainer = self.trainer
+        chain = self.chain
+        trainer.extend(extensions.snapshot_object(chain, 'so_epoch_{.updater.epoch:06}'), trigger=(1,'epoch'))
+        trainer.extend(extensions.snapshot(filename='s_epoch_{.updater.epoch:06}'), trigger=(1,'epoch'))
 
     # Deprecated
     def get_result(self, key):

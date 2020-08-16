@@ -3,17 +3,14 @@ import os
 import numpy as np
 import chainer
 from chainer import sequential
-from chainer import optimizers, serializers, Variable
-from chainer import functions as F
+from chainer import optimizers, serializers
 from chainer import reporter
-from chainer.functions.activation.softmax import softmax
 from chainer.functions.evaluation import accuracy
 from chainer.functions.loss import softmax_cross_entropy
-from chainer import link
 from chainer.utils import weight_clip
 
 
-class ChainRAP(chainer.Chain):
+class ChainRAP(chainer.link.Chain):
 
     def __init__(self, compute_accuracy=True, lossfun=softmax_cross_entropy.softmax_cross_entropy,
                  accfun=accuracy.accuracy):
@@ -30,14 +27,8 @@ class ChainRAP(chainer.Chain):
         if isinstance(sequence, sequential.Sequential) == False:
             raise Exception()
         for i, link in enumerate(sequence.links):
-            if isinstance(link, chainer.link.Link):
-                self.add_link("link_{}".format(i), link)
-                # print(link.name, link)
-            elif isinstance(link, sequential.Sequential):
-                for j, link in enumerate(link.links):
-                    if isinstance(link, chainer.link.Link):
-                        self.add_link("link_{}_{}".format(i, j), link)
-                        # print(link.name, link)
+            self.add_link("link_{}".format(i), link)
+            # print(link.name, link)
 
         self.sequence = sequence
         self.test = False
@@ -101,7 +92,8 @@ class ChainRAP(chainer.Chain):
                     tt = t
 
                 # branchweight = self.branchweights[min(i, len(self.branchweights) - 1)]
-                bloss = self.lossfun(y, tt)
+                self.loss = self.lossfun(y, tt)
+                # print(bloss.type)
 
                 # xp = chainer.cuda.cupy.get_array_module(bloss.data)
                 # if y.creator is not None and not xp.isnan(bloss.data):
@@ -110,7 +102,7 @@ class ChainRAP(chainer.Chain):
                 # reporter.report({'branch{}loss'.format(i): bloss}, self)
                 self.accuracy = self.accfun(y, tt)
                 reporter.report({'accuracy': self.accuracy}, self)
-                reporter.report({'loss': bloss}, self)
+                reporter.report({'loss': self.loss}, self)
                 # Overall accuracy and loss of the sequence
             # reporter.report({'loss': self.loss}, self)
 
