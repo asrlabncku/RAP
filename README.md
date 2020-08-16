@@ -9,7 +9,7 @@ cd cnet_backend
 cmake .
 make all
 ```
-* <odify dll path to the path of cnet library file in
+* Modify the path of cnet library file (dllpath) in
     * chainer/functions/cnet/function_cnet_convolution_2d.py
     * chainer/functions/cnet/function_cnet_linear.py
     * chainer/functions/cnet/function_cnet_maxpool.py
