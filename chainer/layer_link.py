@@ -36,7 +36,7 @@ class Link(object):
             print "    {}: {}".format(attr, value)
 
 class Convolution2D(Link):
-    def __init__(self, in_channels, out_channels, ksize, stride=1, pad=0, bias=0, nobias=False, use_cudnn=True, use_weightnorm=False):
+    def __init__(self, in_channels, out_channels, ksize, stride=1, pad=0, bias=0, nobias=False, use_cudnn=True):
         self._link = "Convolution2D"
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -46,7 +46,6 @@ class Convolution2D(Link):
         self.bias = bias
         self.nobias = nobias
         self.use_cudnn = use_cudnn
-        self.use_weightnorm = use_weightnorm
 
     def to_link(self):
         args = self.to_chainer_args()
@@ -64,7 +63,7 @@ class Convolution2D(Link):
         return chainer.links.Convolution2D(**args)
 
 class Deconvolution2D(Link):
-    def __init__(self, in_channels, out_channels, ksize, stride=1, pad=0, bias=0, nobias=False, outsize=None, use_cudnn=True, use_weightnorm=False):
+    def __init__(self, in_channels, out_channels, ksize, stride=1, pad=0, bias=0, nobias=False, outsize=None, use_cudnn=True):
         self._link = "Deconvolution2D"
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -75,7 +74,6 @@ class Deconvolution2D(Link):
         self.nobias = nobias
         self.outsize = outsize
         self.use_cudnn = use_cudnn
-        self.use_weightnorm = use_weightnorm
 
     def to_link(self):
         args = self.to_chainer_args()
@@ -138,13 +136,12 @@ class GRU(Link):
         return True
 
 class Linear(Link):
-    def __init__(self, in_size, out_size, bias=0, nobias=False, use_weightnorm=False):
+    def __init__(self, in_size, out_size, bias=0, nobias=False):
         self._link = "Linear"
         self.in_size = in_size
         self.out_size = out_size
         self.bias = bias
         self.nobias = nobias
-        self.use_weightnorm = use_weightnorm
 
     def to_link(self):
         args = self.to_chainer_args()

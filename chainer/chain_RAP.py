@@ -27,7 +27,8 @@ class ChainRAP(chainer.link.Chain):
         if isinstance(sequence, sequential.Sequential) == False:
             raise Exception()
         for i, link in enumerate(sequence.links):
-            self.add_link("link_{}".format(i), link)
+            if isinstance(link, chainer.link.Link):
+                self.add_link("link_{}".format(i), link)
             # print(link.name, link)
 
         self.sequence = sequence
