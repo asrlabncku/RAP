@@ -62,13 +62,13 @@ class CnetConvolution2D(link.Link):
         if initialW is not None:
             self.W.data[...] = initialW
         else:
-            # std = wscale * numpy.sqrt(1. / (kh * kw * in_channels))
-            # self.W.data[...] = numpy.random.normal(0, std, W_shape)
-            Wd = numpy.full(W_shape, 0.5, dtype=numpy.float64)
+            std = wscale * numpy.sqrt(1. / (kh * kw * in_channels))
+            self.W.data[...] = numpy.random.normal(0, std, W_shape)
+            # Wd = numpy.full(W_shape, 0.5, dtype=numpy.float64)
             # print(Wd)
             # print("ori")
             # print(self.W.data)
-            self.W.data[...] = Wd
+            # self.W.data[...] = Wd
             # print("after")
             # print(self.W.data)
 

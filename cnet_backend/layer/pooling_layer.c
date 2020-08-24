@@ -62,11 +62,12 @@ void max_pooling_layer_backward(layer_t *l, pooling_layer_t *pooling)
 	for (b = 0; b < l->batch; ++b)
 	{
 	    im2col(&l->input.val, b * l->input.size, pooling->ic, pooling->ih, pooling->iw, pooling->k, pooling->s, pooling->p, &l->extra.val, 0);
+//        printf("im2col\n");
 		for (k = 0; k < channels; ++k)
 		{
 			int offset = k * out_size;
 			int pool_offset = pool_size * offset;
-            memset(r, 0, sizeof(r));
+
 			for (j = 0; j < out_size; ++j)
 			{
 				l->output.val[b * l->output.size + offset + j] = l->extra.val[pool_offset + j];
@@ -77,13 +78,17 @@ void max_pooling_layer_backward(layer_t *l, pooling_layer_t *pooling)
 				int index = pool_offset + i * out_size;
 				for (j = 0; j < out_size; ++j)
 				{
-					if (l->extra.val[index + j] > l->output.val[offset + j]){
+					if (l->extra.val[index + j] > l->output.val[offset + j])
 						l->output.val[b * l->output.size + offset + j] = l->extra.val[index + j];
-						r[j] = i;
-					}
 				}
 			}
-
+		}
+//		for(i=0; i < channels * out_size; i++)
+//	        printf("%f ", l->output.val[i + b * channels * out_size]);
+//	    printf("\n");
+		for (k = 0; k < channels; ++k)
+		{
+			int offset = k * out_size;
 			for (i = 0; i < pool_size; ++i)
 			{
 				int index = (k * pool_size + i) * out_size;
@@ -92,20 +97,26 @@ void max_pooling_layer_backward(layer_t *l, pooling_layer_t *pooling)
 //                printf("%d ", r[i]);
 				for (j = 0; j < out_size; ++j)
 				{
-				    if (r[j] == i)
-				        l->extra.grad[index + j] = l->output.grad[b * l->output.size + offset + j];
-				    else
-				        l->extra.grad[index + j] = 0;
-//				    printf("%f\n", l->output.val[b * l->output.size + offset + j]);
-//					if (l->extra.val[index + j] != l->output.val[b * l->output.size + offset + j])
-//						l->extra.grad[index + j] = 0;
-//					else
-//						l->extra.grad[index + j] = l->output.grad[b * l->output.size + offset + j];
+//				    if (r[j] == i)
+//				        l->extra.grad[index + j] = l->output.grad[b * l->output.size + offset + j];
+//				    else
+//				        l->extra.grad[index + j] = 0;
+//				    printf("%d %f\n", (index + j), l->extra.val[index + j]);
+//				    printf("%d %f\n", (b * l->output.size + offset + j), l->output.val[b * l->output.size + offset + j]);
+					if (l->extra.val[index + j] != l->output.val[b * l->output.size + offset + j])
+						l->extra.grad[index + j] = 0;
+					else
+						l->extra.grad[index + j] = l->output.grad[b * l->output.size + offset + j];
 				}
 
 			}
 //			printf("\n");
 		}
+//        printf("%d memset\n", b);
+		memset(l->input.grad + b * l->input.size, 0, l->input.size * sizeof(l->input.grad[0]));
+//		printf("%d col2im\n", b);
+		col2im(&l->extra.grad, 0, pooling->ic, pooling->ih, pooling->iw, pooling->k, pooling->s, pooling->p, &l->input.grad, b * l->input.size);
+	}
 
 		memset(l->input.grad + b * l->input.size, 0, l->input.size * sizeof(l->input.grad[0]));
 		col2im(&l->extra.grad, 0, pooling->ic, pooling->ih, pooling->iw, pooling->k, pooling->s, pooling->p, &l->input.grad, b * l->input.size);

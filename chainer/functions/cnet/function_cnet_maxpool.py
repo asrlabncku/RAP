@@ -203,10 +203,7 @@ class CnetMaxPooling2DFunction(function.Function):
         # print(len(inputs[0]))
         x = _as_mat(inputs[0])
         n, c, h, w = inputs[0].shape
-        out_c = c
-        out_w = (w + 2 * self.pw - self.kw) / self.sx + 1
-        out_h = (h + 2 * self.ph - self.kh) / self.sy + 1
-        T_batch = n
+        on, out_c, out_w, out_h = grad_outputs[0].shape
         input_grad = (c_float * np.size(x))()
         extra_size = c * self.kh * self.kw * out_w * out_h
         e_grad = (c_float * extra_size)()
@@ -217,7 +214,7 @@ class CnetMaxPooling2DFunction(function.Function):
 
         l = layer()
         pool_p = conv_layer_t()
-        l.batch = T_batch
+        l.batch = n
         l.input = data_t(c * h * w, cast(x.ctypes.data, POINTER(c_float)), input_grad)
         l.output = data_t(out_h * out_w * out_c, o, cast(grad_outputs[0].ctypes.data, POINTER(c_float)))
         l.bias = data_t(0)

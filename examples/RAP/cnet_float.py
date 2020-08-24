@@ -1,7 +1,7 @@
 import os
 
-import chainer
-import chainer.serializers as S
+# import chainer
+# import chainer.serializers as S
 from chainer.training import Trainer_RAP
 from chainer.function import *
 from chainer import Sequential
@@ -10,7 +10,7 @@ import numpy
 from chainer.binary_layer_link import *
 
 
-folder = "models/binary_float"
+folder = "models/binary_float_mnist"
 
 nfilters_embeded = int(32)
 nlayers_embeded = int(1)
@@ -59,7 +59,7 @@ print("Training Over !")
 
 print("Gen Code Start ! ")
 
-save_file = "m10_cnet.h"
+save_file = "m10_cnet_1e.h"
 in_shape = (1,28,28)
 c_code = model.generate_c(in_shape)
 save_dir = os.path.join(os.path.split(save_file)[:-1])[0]
@@ -80,8 +80,8 @@ trainset, testset = chainer.datasets.get_mnist(ndim=3)
 test_iter = chainer.iterators.SerialIterator(testset, 1,repeat=False, shuffle=False)
 chain.train = False
 chain.test = True
-chain.to_gpu(0)
-result = chainer.training.extensions.Evaluator(test_iter, chain, device=0)()
+# chain.to_gpu(0)
+result = chainer.training.extensions.Evaluator(test_iter, chain, device=-1)()
 
 print("Inference Over ! ")
 

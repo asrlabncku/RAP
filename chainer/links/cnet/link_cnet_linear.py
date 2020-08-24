@@ -71,7 +71,7 @@ class CnetLinear(link.Link):
 
 
     def _initialize_params(self, in_size):
-        self.add_param('W', (self.out_size, in_size), initializer=initializers.Constant(0.5))
+        self.add_param('W', (self.out_size, in_size), initializer=self._W_initializer)
 
     def __call__(self, x):
         """Applies the linear layer.
