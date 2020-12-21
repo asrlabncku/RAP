@@ -117,10 +117,6 @@ void max_pooling_layer_backward(layer_t *l, pooling_layer_t *pooling)
 //		printf("%d col2im\n", b);
 		col2im(&l->extra.grad, 0, pooling->ic, pooling->ih, pooling->iw, pooling->k, pooling->s, pooling->p, &l->input.grad, b * l->input.size);
 	}
-
-		memset(l->input.grad + b * l->input.size, 0, l->input.size * sizeof(l->input.grad[0]));
-		col2im(&l->extra.grad, 0, pooling->ic, pooling->ih, pooling->iw, pooling->k, pooling->s, pooling->p, &l->input.grad, b * l->input.size);
-	}
 	free(r);
 }
 
